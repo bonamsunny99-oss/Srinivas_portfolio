@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Srinivas Reddy — Embedded Systems &amp; IoT Engineer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0F0D; --bg-panel:#101713; --board:#141F1A; --board-line:#1D3129;
+    --copper:#C6883F; --copper-bright:#E8A05C; --signal:#6FE3C4; --signal-dim:#3D7A6C;
+    --text:#EDEFEE; --text-muted:#8FA39A; --silk:#F5F3EC;
+    --mx:50%; --my:50%;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--bg); color:var(--text); font-family:'Space Grotesk',sans-serif; overflow-x:hidden;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  a{color:inherit;text-decoration:none;}
+  ::selection{background:var(--copper); color:#0A0F0D;}
+  ::-webkit-scrollbar{width:8px;}
+  ::-webkit-scrollbar-thumb{background:var(--board-line);}
+
+  body::before{
+    content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
+    background-image:linear-gradient(var(--board-line) 1px, transparent 1px), linear-gradient(90deg, var(--board-line) 1px, transparent 1px);
+    background-size:44px 44px; opacity:0.1;
+  }
+
+  .reveal{opacity:0; transform:translateY(26px); transition:opacity .7s ease, transform .7s ease;}
+  .reveal.visible{opacity:1; transform:translateY(0);}
+
+  /* ===== BOOT OVERLAY ===== */
+  #boot{
+    position:fixed; inset:0; z-index:999; background:#05080699;
+    background:#060A08; display:flex; align-items:center; justify-content:center;
+    transition:opacity .6s ease, visibility .6s ease;
+  }
+  #boot.hide{opacity:0; visibility:hidden; pointer-events:none;}
+  #boot-text{font-family:'IBM Plex Mono',monospace; color:var(--signal); font-size:14px; line-height:1.9; letter-spacing:1px;}
+  #boot-text .cur{display:inline-block; width:8px; height:14px; background:var(--signal); animation:blink .8s step-end infinite; vertical-align:-2px;}
+  @keyframes blink{50%{opacity:0;}}
+
+  /* ===== NAV ===== */
+  nav{position:fixed; top:0; left:0; right:0; z-index:100; display:flex; align-items:center; justify-content:space-between; padding:18px 6vw; background:rgba(10,15,13,0.7); backdrop-filter:blur(10px); border-bottom:1px solid var(--board-line);}
+  .logo{font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:13px; letter-spacing:2px; color:var(--silk); display:flex; align-items:center; gap:8px;}
+  .logo .dot{width:7px; height:7px; border-radius:50%; background:var(--signal); box-shadow:0 0 8px var(--signal); animation:pulse2 2.2s ease-in-out infinite;}
+  @keyframes pulse2{0%,100%{opacity:1;} 50%{opacity:.3;}}
+  .navlinks{display:flex; gap:30px; font-size:12.5px;}
+  .navlinks a{font-family:'IBM Plex Mono',monospace; color:var(--text-muted); letter-spacing:1px; transition:color .3s;}
+  .navlinks a::before{content:'/'; color:var(--copper); margin-right:6px;}
+  .navlinks a:hover{color:var(--copper-bright);}
+  @media(max-width:760px){.navlinks{display:none;}}
+
+  /* ===== HERO with waveform + spotlight ===== */
+  .hero{
+    min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    position:relative; padding:110px 6vw 40px; text-align:center; z-index:1;
+    background:radial-gradient(600px circle at var(--mx) var(--my), rgba(198,136,63,0.08), transparent 60%);
+  }
+  .eyebrow{font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:4px; text-transform:uppercase; color:var(--signal); border:1px solid var(--signal-dim); padding:6px 14px; border-radius:2px; background:rgba(111,227,196,0.05); margin-bottom:26px;}
+  h1{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(2.4rem,7vw,5rem); line-height:1.03; letter-spacing:-2px; color:var(--silk); margin-bottom:20px;}
+  h1 span{color:var(--copper-bright);}
+  .hero-sub{max-width:640px; color:var(--text-muted); font-size:clamp(1rem,1.6vw,1.2rem); line-height:1.65; margin-bottom:30px;}
+
+  #wave-wrap{width:min(720px,90vw); height:90px; margin:0 auto 34px;}
+  #wave{width:100%; height:100%;}
+  .wave-path{fill:none; stroke:var(--signal); stroke-width:2; filter:drop-shadow(0 0 6px rgba(111,227,196,.5));}
+  .wave-base{fill:none; stroke:var(--board-line); stroke-width:1;}
+
+  .hero-links{display:flex; gap:16px; justify-content:center; flex-wrap:wrap;}
+  .pin-btn{font-family:'IBM Plex Mono',monospace; font-size:13px; letter-spacing:1px; padding:12px 22px; border:1px solid var(--copper); color:var(--copper-bright); border-radius:2px; transition:all .3s ease; position:relative; overflow:hidden;}
+  .pin-btn::before{content:''; position:absolute; inset:0; background:var(--copper); opacity:0; transition:opacity .3s ease; z-index:-1;}
+  .pin-btn:hover{color:#0A0F0D;} .pin-btn:hover::before{opacity:1;}
+  .pin-btn.primary{background:var(--copper); color:#0A0F0D;}
+
+  .scroll-cue{margin-top:50px; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--text-muted); display:flex; flex-direction:column; align-items:center; gap:8px; letter-spacing:2px;}
+  .scroll-cue .line{width:1px; height:28px; background:linear-gradient(var(--signal), transparent); animation:pulseline 1.8s ease-in-out infinite;}
+  @keyframes pulseline{0%,100%{opacity:.3;} 50%{opacity:1;}}
+
+  /* ===== SECTION SHELL ===== */
+  section{position:relative; z-index:1; padding:110px 6vw; max-width:1180px; margin:0 auto;}
+  .section-head{display:flex; align-items:baseline; gap:18px; margin-bottom:50px; border-bottom:1px solid var(--board-line); padding-bottom:20px;}
+  .section-num{font-family:'IBM Plex Mono',monospace; color:var(--copper); font-size:13px; letter-spacing:2px;}
+  .section-title{font-size:clamp(1.6rem,3vw,2.3rem); font-weight:600; color:var(--silk);}
+
+  /* ===== SKILLS: toggle-switch panel bento ===== */
+  .bento{display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:14px;}
+  .switch-card{background:var(--bg-panel); border:1px solid var(--board-line); border-radius:6px; padding:24px 24px 26px; transition:border-color .3s ease, transform .3s ease;}
+  .switch-card:hover{transform:translateY(-3px); border-color:var(--signal-dim);}
+  .switch-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;}
+  .switch-head h3{font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--text-muted);}
+  .toggle{width:38px; height:20px; border-radius:20px; background:var(--board-line); position:relative; flex-shrink:0;}
+  .toggle::after{content:''; position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:50%; background:var(--text-muted); transition:transform .5s cubic-bezier(.65,0,.35,1), background .5s ease;}
+  .switch-card.on .toggle{background:rgba(111,227,196,0.15); box-shadow:inset 0 0 0 1px var(--signal-dim);}
+  .switch-card.on .toggle::after{transform:translateX(18px); background:var(--signal); box-shadow:0 0 8px var(--signal);}
+  .chip-row{display:flex; flex-wrap:wrap; gap:8px;}
+  .chip{font-family:'IBM Plex Mono',monospace; font-size:11.5px; padding:5px 10px; border:1px solid var(--board-line); color:var(--text-muted); border-radius:2px; transition:.3s;}
+  .switch-card.on .chip{border-color:rgba(198,136,63,.4); color:var(--copper-bright);}
+
+  /* ===== PROJECTS: accordion IC modules ===== */
+  .projects-list{display:flex; flex-direction:column; gap:16px;}
+  .ic-card{background:var(--board); border:1px solid var(--board-line); border-radius:6px; overflow:hidden; transition:border-color .3s ease;}
+  .ic-card.open{border-color:var(--signal-dim);}
+  .ic-head-row{display:flex; align-items:center; gap:20px; padding:26px 30px; cursor:pointer; user-select:none;}
+  .ic-icon{width:46px; height:46px; flex-shrink:0; display:flex; align-items:center; justify-content:center;}
+  .ic-icon svg{width:100%; height:100%;}
+  .ic-title-wrap{flex:1;}
+  .ic-title{font-size:1.15rem; font-weight:600; color:var(--silk); margin-bottom:4px;}
+  .ic-domain{font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--signal);}
+  .ic-date{font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--copper-bright); white-space:nowrap;}
+  .ic-status{width:8px; height:8px; border-radius:50%; background:var(--board-line); flex-shrink:0; transition:.3s;}
+  .ic-card.open .ic-status{background:var(--signal); box-shadow:0 0 8px var(--signal);}
+  .ic-chevron{font-family:'IBM Plex Mono',monospace; color:var(--text-muted); transition:transform .35s ease; flex-shrink:0;}
+  .ic-card.open .ic-chevron{transform:rotate(180deg); color:var(--signal);}
+
+  .ic-body{max-height:0; overflow:hidden; transition:max-height .5s ease;}
+  .ic-body-inner{padding:0 30px 30px 96px;}
+  .ic-card ul{list-style:none; margin-bottom:16px;}
+  .ic-card li{position:relative; padding-left:20px; margin-bottom:9px; color:var(--text-muted); font-size:14px; line-height:1.6;}
+  .ic-card li::before{content:''; position:absolute; left:0; top:8px; width:8px; height:1.5px; background:var(--copper);}
+  .ic-tools{display:flex; flex-wrap:wrap; gap:8px;}
+  .ic-tools span{font-family:'IBM Plex Mono',monospace; font-size:11px; padding:4px 9px; background:rgba(198,136,63,0.08); border:1px solid rgba(198,136,63,0.35); color:var(--copper-bright); border-radius:2px;}
+
+  /* ===== CERTS ===== */
+  .cert-list{display:flex; flex-direction:column;}
+  .cert-row{display:flex; justify-content:space-between; align-items:center; padding:18px 4px; border-bottom:1px solid var(--board-line); gap:20px; flex-wrap:wrap;}
+  .cert-row:first-child{border-top:1px solid var(--board-line);}
+  .cert-name{font-size:15px; color:var(--text);}
+  .cert-name b{color:var(--silk); font-weight:600;}
+  .cert-meta{font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--text-muted); display:flex; align-items:center; gap:10px;}
+  .cert-meta .led{width:6px; height:6px; border-radius:50%; background:var(--signal); box-shadow:0 0 6px var(--signal);}
+
+  /* ===== EDUCATION ===== */
+  .timeline{position:relative; padding-left:34px;}
+  .timeline::before{content:''; position:absolute; left:5px; top:6px; bottom:6px; width:1.5px; background:linear-gradient(var(--copper), var(--signal-dim));}
+  .tl-item{position:relative; margin-bottom:36px;}
+  .tl-item:last-child{margin-bottom:0;}
+  .tl-item::before{content:''; position:absolute; left:-34px; top:5px; width:11px; height:11px; border-radius:50%; background:var(--bg); border:2px solid var(--copper);}
+  .tl-school{font-size:1.05rem; font-weight:600; color:var(--silk); margin-bottom:4px;}
+  .tl-degree{color:var(--text-muted); font-size:14px; margin-bottom:6px;}
+  .tl-meta{font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--signal);}
+
+  .achieve-card{display:flex; gap:16px; align-items:flex-start; background:var(--bg-panel); border:1px solid var(--board-line); padding:24px 28px; border-radius:6px; margin-top:44px;}
+  .achieve-card .glyph{font-family:'IBM Plex Mono',monospace; color:var(--copper); font-size:18px;}
+  .achieve-card p{color:var(--text-muted); font-size:14px; line-height:1.7;}
+  .achieve-card b{color:var(--silk);}
+
+  footer{position:relative; z-index:1; padding:100px 6vw 60px; text-align:center; border-top:1px solid var(--board-line);}
+  footer h2{font-size:clamp(1.8rem,4vw,2.8rem); color:var(--silk); margin-bottom:18px;}
+  footer p{color:var(--text-muted); margin-bottom:36px; font-size:15px;}
+  .footer-links{display:flex; gap:16px; justify-content:center; flex-wrap:wrap; margin-bottom:50px;}
+  .foot-note{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--text-muted); opacity:.55; letter-spacing:1px;}
+
+  @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms !important; transition-duration:.01ms !important;}}
+  @media(max-width:600px){ .ic-body-inner{padding-left:30px;} .ic-icon{display:none;} }
+</style>
+</head>
+<body>
+
+<div id="boot"><div id="boot-text" class="mono"></div></div>
+
+<nav>
+  <div class="logo"><span class="dot"></span>SRINIVAS_REDDY</div>
+  <div class="navlinks">
+    <a href="#skills">skills</a><a href="#projects">projects</a><a href="#certs">certs</a><a href="#education">education</a><a href="#contact">contact</a>
+  </div>
+</nav>
+
+<section class="hero" id="hero-section">
+  <div class="eyebrow mono">● SYSTEM ONLINE</div>
+  <h1>Bonam Lakshmi<br><span>Srinivas Reddy</span></h1>
+  <p class="hero-sub">Embedded Systems &amp; IoT Engineer — I build the layer between sensors and decisions: wearables that catch a fall before it's reported, traffic signals that read the road, edge logic that doesn't wait for the cloud.</p>
+
+  <div id="wave-wrap">
+    <svg id="wave" viewBox="0 0 720 90" preserveAspectRatio="none">
+      <path class="wave-base" d="M0,45 H720"/>
+      <path class="wave-path" id="wavepath" d="M0,45 H720"/>
+    </svg>
+  </div>
+
+  <div class="hero-links">
+    <a class="pin-btn primary" href="mailto:bonamsunny99@gmail.com">EMAIL_ME</a>
+    <a class="pin-btn" href="https://github.com/Srinivas" target="_blank" rel="noopener">GITHUB</a>
+    <a class="pin-btn" href="https://www.linkedin.com/in/bonam-lakshmi-srinivas-reddy" target="_blank" rel="noopener">LINKEDIN</a>
+  </div>
+
+  <div class="scroll-cue"><span>SCROLL</span><span class="line"></span></div>
+</section>
+
+<section id="skills">
+  <div class="section-head reveal"><span class="section-num">01</span><span class="section-title">Skill Register</span></div>
+  <div class="bento">
+    <div class="switch-card reveal">
+      <div class="switch-head"><h3>Languages</h3><div class="toggle"></div></div>
+      <div class="chip-row"><span class="chip">C</span><span class="chip">C++</span><span class="chip">Python</span><span class="chip">Assembly</span><span class="chip">MicroPython</span><span class="chip">Java</span></div>
+    </div>
+    <div class="switch-card reveal">
+      <div class="switch-head"><h3>Technologies</h3><div class="toggle"></div></div>
+      <div class="chip-row"><span class="chip">Arduino IDE</span><span class="chip">Embedded Systems</span><span class="chip">Verilog</span><span class="chip">VHDL</span></div>
+    </div>
+    <div class="switch-card reveal">
+      <div class="switch-head"><h3>Hardware</h3><div class="toggle"></div></div>
+      <div class="chip-row"><span class="chip">PIC Microcontrollers</span><span class="chip">Arduino Uno</span><span class="chip">ESP32</span><span class="chip">Sensors</span></div>
+    </div>
+    <div class="switch-card reveal">
+      <div class="switch-head"><h3>Tools / Platforms</h3><div class="toggle"></div></div>
+      <div class="chip-row"><span class="chip">Proteus</span><span class="chip">Keil</span><span class="chip">MATLAB</span><span class="chip">Creo</span><span class="chip">Thonny</span><span class="chip">Cadence</span></div>
+    </div>
+    <div class="switch-card reveal">
+      <div class="switch-head"><h3>Working Style</h3><div class="toggle"></div></div>
+      <div class="chip-row"><span class="chip">Problem-Solving</span><span class="chip">Team Collaboration</span><span class="chip">Adaptability</span><span class="chip">Technical Communication</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="projects">
+  <div class="section-head reveal"><span class="section-num">02</span><span class="section-title">Project Modules</span></div>
+  <p class="reveal mono" style="color:var(--text-muted); font-size:12.5px; letter-spacing:1px; margin-top:-30px; margin-bottom:36px;">// click a module to expand</p>
+
+  <div class="projects-list">
+
+    <div class="ic-card reveal" data-card>
+      <div class="ic-head-row" data-toggle>
+        <div class="ic-icon"><svg viewBox="0 0 48 48"><rect x="10" y="10" width="28" height="28" rx="3" fill="none" stroke="var(--copper)" stroke-width="2"/><g stroke="var(--copper)" stroke-width="2"><line x1="0" y1="16" x2="10" y2="16"/><line x1="0" y1="24" x2="10" y2="24"/><line x1="0" y1="32" x2="10" y2="32"/><line x1="38" y1="16" x2="48" y2="16"/><line x1="38" y1="24" x2="48" y2="24"/><line x1="38" y1="32" x2="48" y2="32"/></g><circle cx="24" cy="24" r="4" fill="var(--signal)"/></svg></div>
+        <div class="ic-title-wrap">
+          <div class="ic-title">Aegis-Node: Unified Edge Safety System</div>
+          <div class="ic-domain">IoT · Edge Computing</div>
+        </div>
+        <div class="ic-date">APR '25</div>
+        <div class="ic-status"></div>
+        <div class="ic-chevron">▾</div>
+      </div>
+      <div class="ic-body">
+        <div class="ic-body-inner">
+          <ul>
+            <li>Designed an IoT-based wearable safety monitoring system for industrial workers using ESP32.</li>
+            <li>Incorporated real-time monitoring for gas leakage, heart rate abnormalities, and fall detection using sensors.</li>
+            <li>Built an edge computing architecture that processes emergency events locally without cloud dependency.</li>
+            <li>Added OLED display and buzzer alerts for instant audio-visual emergency notifications.</li>
+            <li>Enabled live data transmission via WebSocket-based communication for low-latency response.</li>
+          </ul>
+          <div class="ic-tools"><span>ESP32</span><span>MQ-2 Gas Sensor</span><span>MAX30102</span><span>MPU6050</span><span>OLED Display</span><span>Buzzer</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ic-card reveal" data-card>
+      <div class="ic-head-row" data-toggle>
+        <div class="ic-icon"><svg viewBox="0 0 48 48"><rect x="20" y="4" width="8" height="40" fill="none" stroke="var(--copper)" stroke-width="2" rx="4"/><circle cx="24" cy="14" r="4" fill="var(--copper)"/><circle cx="24" cy="24" r="4" fill="none" stroke="var(--copper)" stroke-width="2"/><circle cx="24" cy="34" r="4" fill="var(--signal)"/></svg></div>
+        <div class="ic-title-wrap">
+          <div class="ic-title">Smart Traffic Light System using ESP32</div>
+          <div class="ic-domain">Embedded · Computer Vision</div>
+        </div>
+        <div class="ic-date">DEC '25</div>
+        <div class="ic-status"></div>
+        <div class="ic-chevron">▾</div>
+      </div>
+      <div class="ic-body">
+        <div class="ic-body-inner">
+          <ul>
+            <li>Developed an ESP32-based smart traffic light control system using computer vision techniques.</li>
+            <li>Integrated real-time vehicle density detection using camera input to analyze traffic conditions.</li>
+            <li>Implemented dynamic signal timing to allocate longer green phases to high-density lanes.</li>
+            <li>Reduced congestion and unnecessary waiting time at intersections.</li>
+          </ul>
+          <div class="ic-tools"><span>ESP32</span><span>Transmitter</span><span>Receiver</span><span>Encoder</span><span>Decoder</span><span>LEDs</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ic-card reveal" data-card>
+      <div class="ic-head-row" data-toggle>
+        <div class="ic-icon"><svg viewBox="0 0 48 48"><path d="M24 6 L44 22 V42 H4 V22 Z" fill="none" stroke="var(--copper)" stroke-width="2"/><path d="M17 22 Q24 12 31 22" fill="none" stroke="var(--signal)" stroke-width="2"/></svg></div>
+        <div class="ic-title-wrap">
+          <div class="ic-title">IoT-Based Home Automation System Using Arduino</div>
+          <div class="ic-domain">IoT · Home Automation</div>
+        </div>
+        <div class="ic-date">MAR '23</div>
+        <div class="ic-status"></div>
+        <div class="ic-chevron">▾</div>
+      </div>
+      <div class="ic-body">
+        <div class="ic-body-inner">
+          <ul>
+            <li>Engineered a smart home automation system using relay modules to control appliances remotely.</li>
+            <li>Used the Blynk mobile app for wireless monitoring and control of devices via Wi-Fi.</li>
+            <li>Integrated motion and temperature sensing for energy-efficient automated operation.</li>
+          </ul>
+          <div class="ic-tools"><span>Arduino IDE</span><span>Blynk</span><span>DHT11</span><span>PIR Sensor</span><span>Relay Module</span><span>NodeMCU</span><span>Wi-Fi</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section id="certs">
+  <div class="section-head reveal"><span class="section-num">03</span><span class="section-title">Certificates</span></div>
+  <div class="cert-list reveal">
+    <div class="cert-row"><div class="cert-name"><b>Embedded C</b> — Cursa</div><div class="cert-meta"><span class="led"></span>JUN '25</div></div>
+    <div class="cert-row"><div class="cert-name"><b>Semiconductors — VLSI &amp; Embedded Systems Overview</b> — Maven Silicon</div><div class="cert-meta"><span class="led"></span>DEC '25</div></div>
+    <div class="cert-row"><div class="cert-name"><b>IoT: From Scratch to Market</b> — Udemy</div><div class="cert-meta"><span class="led"></span>DEC '23</div></div>
+    <div class="cert-row"><div class="cert-name"><b>Python Programming</b> — Scalar</div><div class="cert-meta"><span class="led"></span>NOV '23</div></div>
+  </div>
+</section>
+
+<section id="education">
+  <div class="section-head reveal"><span class="section-num">04</span><span class="section-title">Education</span></div>
+  <div class="timeline reveal">
+    <div class="tl-item"><div class="tl-school">Lovely Professional University</div><div class="tl-degree">B.Tech, Electronics &amp; Communication Engineering — CGPA 4.95</div><div class="tl-meta">PUNJAB, INDIA · AUG '23 – PRESENT</div></div>
+    <div class="tl-item"><div class="tl-school">Narayana Junior College</div><div class="tl-degree">Intermediate — 89%</div><div class="tl-meta">VIJAYAWADA, ANDHRA PRADESH · JUN '21 – MAR '23</div></div>
+    <div class="tl-item"><div class="tl-school">Vikas Techno School</div><div class="tl-degree">Matriculation — 92%</div><div class="tl-meta">VISSANNAPETA, ANDHRA PRADESH · APR '20 – MAR '21</div></div>
+  </div>
+  <div class="achieve-card reveal"><div class="glyph">▣</div><p><b>Community Service —</b> Volunteered at an old-age home through an NGO (Jul '25).</p></div>
+</section>
+
+<footer id="contact">
+  <h2 class="reveal">Let's build something reliable.</h2>
+  <p class="reveal">Open to embedded systems, IoT, and edge-computing roles &amp; collaborations.</p>
+  <div class="footer-links reveal">
+    <a class="pin-btn primary" href="mailto:bonamsunny99@gmail.com">bonamsunny99@gmail.com</a>
+    <a class="pin-btn" href="tel:+919959022173">+91 99590 22173</a>
+    <a class="pin-btn" href="https://github.com/Srinivas" target="_blank" rel="noopener">GitHub</a>
+    <a class="pin-btn" href="https://www.linkedin.com/in/bonam-lakshmi-srinivas-reddy" target="_blank" rel="noopener">LinkedIn</a>
+  </div>
+  <div class="foot-note">// BUILT WITH SIGNAL INTEGRITY — © 2026 B.L. SRINIVAS REDDY</div>
+</footer>
+
+<script>
+  // Boot sequence
+  const bootLines = ["> booting profile.sys ...","> loading firmware: SRINIVAS_REDDY.hex","> mounting sensors [ok]","> establishing signal ... connected","> welcome"];
+  const bootEl = document.getElementById('boot-text');
+  let li=0, ci=0, out='';
+  function typeBoot(){
+    if(li>=bootLines.length){ setTimeout(()=>document.getElementById('boot').classList.add('hide'), 350); return; }
+    const line = bootLines[li];
+    if(ci<line.length){ out+=line[ci]; ci++; bootEl.innerHTML=out.replace(/\n/g,'<br>')+'<span class="cur"></span>'; setTimeout(typeBoot, 18); }
+    else{ out+='\n'; li++; ci=0; setTimeout(typeBoot, 220); }
+  }
+  typeBoot();
+
+  // Reveal on scroll
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('visible'); io.unobserve(e.target);} });
+  },{threshold:0.15});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+  // Toggle switches flip on when their card enters view
+  const switchIO = new IntersectionObserver((entries)=>{
+    entries.forEach((e,idx)=>{
+      if(e.isIntersecting){
+        setTimeout(()=> e.target.classList.add('on'), 250);
+        switchIO.unobserve(e.target);
+      }
+    });
+  },{threshold:0.3});
+  document.querySelectorAll('.switch-card').forEach(el=>switchIO.observe(el));
+
+  // Accordion project cards
+  document.querySelectorAll('[data-toggle]').forEach(head=>{
+    head.addEventListener('click', ()=>{
+      const card = head.closest('[data-card]');
+      const body = card.querySelector('.ic-body');
+      const isOpen = card.classList.contains('open');
+      document.querySelectorAll('[data-card].open').forEach(c=>{
+        if(c!==card){ c.classList.remove('open'); c.querySelector('.ic-body').style.maxHeight=null; }
+      });
+      if(isOpen){ card.classList.remove('open'); body.style.maxHeight=null; }
+      else{ card.classList.add('open'); body.style.maxHeight = body.scrollHeight+'px'; }
+    });
+  });
+
+  // Hero spotlight follows cursor
+  const heroSection = document.getElementById('hero-section');
+  heroSection.addEventListener('mousemove', (e)=>{
+    const r = heroSection.getBoundingClientRect();
+    document.documentElement.style.setProperty('--mx', (e.clientX-r.left)+'px');
+    document.documentElement.style.setProperty('--my', (e.clientY-r.top)+'px');
+  });
+
+  // Live heartbeat/oscilloscope waveform
+  const wavepath = document.getElementById('wavepath');
+  let t = 0;
+  function buildWave(offset){
+    const w=720,h=90,mid=45,pts=[];
+    const segs = 60;
+    for(let i=0;i<=segs;i++){
+      const x = (i/segs)*w;
+      const phase = (i + offset) * 0.35;
+      // baseline flat with occasional pulse spike (heartbeat-like)
+      const pulsePos = ((i+offset) % 24);
+      let y = mid;
+      if(pulsePos>10 && pulsePos<12) y = mid - 26;
+      else if(pulsePos>=12 && pulsePos<13) y = mid + 14;
+      else if(pulsePos>=13 && pulsePos<14) y = mid - 6;
+      else y = mid + Math.sin(phase)*2;
+      pts.push(x.toFixed(1)+','+y.toFixed(1));
+    }
+    return 'M'+pts.join(' L');
+  }
+  function animateWave(){
+    t += 0.6;
+    wavepath.setAttribute('d', buildWave(t));
+    requestAnimationFrame(animateWave);
+  }
+  animateWave();
+</script>
+
+</body>
+</html>
